@@ -1,10 +1,9 @@
 
 # 🎥 Netflix EDA
 
-
-[![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://interactifnetflixeda.streamlit.app)
+[![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://interactivenetflixeda.streamlit.app)
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
-[![Tests](https://github.com/GeeksterLab/InteractiveNetflixEDA/actions/workflows/ci.yml/badge.svg)](https://github.com/GeeksterLab/InteractiveNetflixEDA/actions)
+
 ---
 
 ## 📖 Table of Contents
@@ -128,7 +127,7 @@ Features:
 - 📺 TV Shows exploration (seasons & episodes)
 - 🔍 Cleaned vs unmatched titles analysis
 
-Demo: [🔗 Streamlit App](https://interactifnetflixeda.streamlit.app/)
+Demo: [🔗 Streamlit App](https://interactivenetflixeda.streamlit.app/)
 
 The web interface will launch, and you can interact with your data via a visual dashboard.
 
