@@ -1,23 +1,22 @@
-import pandas as pd
-from datetime import datetime
+"""Extract unmatched titles from the latest enriched Netflix history file."""
+
+from __future__ import annotations
+
+from netflix_utils import PROCESSED_DIR, load_latest_enriched_file, timestamp
 
 
-# Charger le fichier enrichi
-df = pd.read_csv('data/processed/enriched_netflix_history2.csv')
+def main() -> None:
+    df = load_latest_enriched_file()
+    missing = df[df["catalog_title"].isna() & ~df["is_technical_asset_title"].fillna(False)].copy()
 
-# Filtrer uniquement les titres non trouvés (Matched_Title vide)
-missing_data = df[df['Matched_Title'].isna()]
+    output_file = PROCESSED_DIR / f"missing_matched_titles_{timestamp()}.csv"
+    missing.to_csv(output_file, index=False)
 
-# Générer un timestamp pour créer des noms de fichiers uniques
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    print(f"⚠️ {len(missing)} non-technical titles are still unmatched.")
+    if not missing.empty:
+        print(missing[["Date Watched", "Title", "match_method", "match_score"]].head(10))
+    print(f"✅ Debug file saved: {output_file}")
 
 
-# Sauvegarder dans un fichier CSV pour analyse
-output_file = f'../data/processed/missing_matched_titles_{timestamp}.csv'
-missing_data.to_csv(output_file, index=False)
-
-# Afficher un extrait des titres non trouvés
-print(f"⚠️ {len(missing_data)} titres n'ont pas été appariés !")
-print(missing_data[['Date Watched', 'Title']].head(10))
-
-print(f"✅ Fichier de debug sauvegardé : {output_file}")
+if __name__ == "__main__":
+    main()

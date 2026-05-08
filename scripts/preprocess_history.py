@@ -1,22 +1,27 @@
-import pandas as pd
+"""Preprocess Netflix ViewingActivity.csv.
+
+Output: data/raw/ViewingActivity_clean.csv
+"""
+
+from __future__ import annotations
+
 import csv
 
-def preprocess_csv(input_file, output_file):
-    # Lire le fichier CSV
-    df = pd.read_csv(input_file, encoding='utf-8')
-    
-    # Supprimer tous les guillemets dans la colonne Title
-    df['Title'] = df['Title'].str.replace(r'[\"“”]', '', regex=True)
-    
-    # Pour les titres contenant "Partie", remplacer "Partie" par "Saison"
-    df['Title'] = df['Title'].str.replace('Partie', 'Saison', regex=False)
-    
-    # Sauvegarder le fichier prétraité en n'ajoutant aucun guillemet
-    # df.to_csv(output_file, index=False, quoting=csv.QUOTE_NONE, escapechar='\\')
-    df.to_csv(output_file, index=False, quoting=csv.QUOTE_MINIMAL)
-    print(f"Les guillemets ont été supprimés et le fichier est sauvegardé sous {output_file}")
+import pandas as pd
 
-if __name__ == '__main__':
-    input_file = '../data/raw/ViewingActivity.csv'
-    output_file = '../data/raw/ViewingActivity2.csv'
-    preprocess_csv(input_file, output_file)
+from netflix_utils import RAW_DIR, clean_title, ensure_project_dirs, validate_columns
+
+
+def preprocess_csv(input_file=RAW_DIR / "ViewingActivity.csv", output_file=RAW_DIR / "ViewingActivity_clean.csv") -> pd.DataFrame:
+    ensure_project_dirs()
+    df = pd.read_csv(input_file, encoding="utf-8")
+    validate_columns(df, ["Title"], "ViewingActivity")
+
+    df["Title"] = df["Title"].apply(clean_title)
+    df.to_csv(output_file, index=False, quoting=csv.QUOTE_MINIMAL)
+    print(f"✅ Clean history saved to: {output_file}")
+    return df
+
+
+if __name__ == "__main__":
+    preprocess_csv()

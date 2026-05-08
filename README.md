@@ -1,66 +1,71 @@
 
 # 🎥 Netflix EDA
 
-[![Netflix EDA Pipeline](https://github.com/YourUsername/Netflix_EDA/actions/workflows/ci.yml/badge.svg)](https://github.com/GeeksterLab/InteractiveNetflixEDA/actions)
-[![codecov](https://codecov.io/gh/YourUsername/Netflix_EDA/graph/badge.svg?token=5sCDDgBvTv)](https://codecov.io/gh/YourUsername/Netflix_EDA)
-[![PyPI](https://img.shields.io/pypi/v/netflix-eda.svg)](https://pypi.org/project/netflix-eda)
-[![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://interactifnetflixeda.streamlit.app)
 
+[![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://interactifnetflixeda.streamlit.app)
+![Python](https://img.shields.io/badge/Python-3.10+-blue?logo=python)
+[![Tests](https://github.com/GeeksterLab/InteractiveNetflixEDA/actions/workflows/ci.yml/badge.svg)](https://github.com/GeeksterLab/InteractiveNetflixEDA/actions)
 ---
 
 ## 📖 Table of Contents
 
-1.  [Introduction](#-introduction)  
-2.  [Architecture](#-architecture)  
-3.  [Project Structure](#-project-structure)  
-4.  [Libraries](#-libraries)  
-5.  [Installation](#-installation)  
-6.  [Usage](#-usage)  
-7.  [Streamlit Interface](#-streamlit-interface)  
-8.  [Deployment](#-deployment)  
-9.  [Reports](#-reports)  
-10. [Tests & CI](#-tests--ci)  
+1.  [Project Overview](#-project-overview)
+2.  [Project Structure](#-project-structure)
+3.  [Key Features](#-key-features)
+4.  [Libraries](#-libraries)
+5.  [Tech Stack](#-tech-stack)
+6.  [Installation & Run](#-installation--run)
+7.  [Streamlit Interface](#-streamlit-interface)
+8. [Tests & Coverage](#-tests--coverage)
+9. [License](#-license)
+10. [Auteur](#-auteur)
 
 ---
 
-## 🧐 Introduction
+## 🎯 Project Overview
 
-**Netflix EDA** is a Data Exploration (EDA) project focused on analyzing trends, genres, and performance of Netflix titles. The project explores historical and forecast data files, analyzes popular movies and TV shows, and generates detailed reports to visualize insights from the data.
+Netflix EDA is a complete data pipeline and interactive dashboard designed to analyze real Netflix viewing history.
+
+This project focuses on transforming noisy real-world data into a clean, structured, and analyzable dataset.
+
+It demonstrates:
+
+- Real-world data cleaning challenges (noisy titles, technical assets)
+- Title normalization and catalog matching
+- Feature extraction (TV shows, seasons, episodes)
+- Visualization and reporting
+- Interactive exploration via Streamlit
+
+The goal is to showcase **data engineering + EDA + product thinking** in a single project.
 
 ---
 
-## 🚧 Architecture
+## 📂 Project Structure
 
-Here is a Mermaid diagram showing the main components and their interactions:
-
-```mermaid
-flowchart LR
-  A[Data Import] --> B[Data Cleaning]
-  B --> C[Data Exploration]
-  C --> D[Data Visualization]
-  D --> E[Generate Reports]
-  E --> F[Streamlit Dashboard]
+```
+InteractiveNetflixEDA/
+├── app/ # Streamlit dashboard
+├── assets/ # CSS & UI elements
+├── data/
+│ ├── raw/ # Original Netflix data
+│ └── processed/ # Cleaned datasets
+├── scripts/ # Data pipeline (cleaning, merge, reports)
+├── visualization/ # Generated charts
+├── reports/ # PDF reports
+├── tests/ # Unit tests
+├── Makefile # Project commands
+└── README.md
 ```
 
-- **Data Import**: Loading raw data from CSV files.
-- **Data Cleaning**: Preparing and cleaning the data.
-- **Data Exploration**: Statistical exploration and identifying key trends.
-- **Data Visualization**: Generating charts to better understand the data.
-- **Generate Reports**: Generating detailed PDF and CSV reports.
-- **Streamlit Dashboard**: Displaying the results on an interactive web interface.
+## 🎯 Key Features
 
----
-
-## 📁 Project Structure
-
-- **assets/**: Contains visual resources such as icons and CSS styles.
-- **data/**: Folder containing raw (`raw`) and processed (`processed`) data files.
-- **env/**: Virtual environment for managing project dependencies.
-- **notebooks/**: Exploratory analysis with Jupyter.
-- **reports/**: Reports generated during analysis, in PDF format.
-- **scripts/**: Python scripts for analysis, report generation, etc.
-- **visualization/**: Contains scripts and tools for visualization.
-- **requirements.txt**: List of project dependencies.
+- Robust cleaning of noisy Netflix data
+- Detection and removal of technical assets (hooks, trailers, clips)
+- Title normalization and matching with catalog metadata
+- Extraction of TV show structure (seasons & episodes)
+- Automated visualization pipeline
+- PDF report generation
+- Interactive Streamlit dashboard
 
 ---
 
@@ -76,82 +81,80 @@ flowchart LR
 * **fpdf** → PDF report creation.
 
 ---
+## 🧰 Tech Stack
 
-## ⚙️ Installation
 
-1. Clone the repository:
-```bash
-git clone https://github.com/YourUsername/Netflix_EDA.git
-cd Netflix_EDA
-```
+| Category         | Tools                   |
+|-----------------|--------------------------|
+| Language        | Python 3.10+             |
+| Data            | pandas, numpy            |
+| Visualization   | matplotlib, seaborn      |
+| Dashboard       | Streamlit                |
+| Matching        | RapidFuzz                |
+| Reporting       | FPDF                     |
+| Testing         | pytest                   |
+| CI/CD           | GitHub Actions           |
 
-2. Create and activate a Python environment:
-```bash
-python3.11 -m venv env
-source env/bin/activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. Install the project in development mode:
-```bash
-pip install -e .
-```
 
 ---
 
-## 🚀 Usage
+## ⚙️ Installation & Run
 
-1. Run the Streamlit interface to explore the data interactively:
 ```bash
-streamlit run scripts/streamlit_app.py
+# 1️⃣ Clone the repo
+git clone https://github.com/GeeksterLab/InteractiveNetflixEDA.git
+cd InteractiveNetflixEDA
+
+# 2️⃣ Create virtual environment
+python -m venv env
+source env/bin/activate
+
+# 3️⃣ Install dependencies
+make install
+
+# 4️⃣ Run Streamlit app
+make app
 ```
 
 ---
 
 ## 🌐 Streamlit Interface
 
-The project includes a **Streamlit** interface that allows you to visualize the EDA interactively. You can easily explore trends of Netflix movies and TV shows, view charts on popular genres, ratings, and much more.
+The project includes a **Streamlit dashboard** to explore your Netflix viewing history.
 
-To start the **Streamlit** interface, simply run:
-```bash
-streamlit run scripts/streamlit_app.py
-```
+Features:
+- 📊 Viewing trends (year, month, day)
+- 🎬 Top movies & TV shows
+- 📺 TV Shows exploration (seasons & episodes)
+- 🔍 Cleaned vs unmatched titles analysis
+
+Demo: [🔗 Streamlit App](https://interactifnetflixeda.streamlit.app/)
 
 The web interface will launch, and you can interact with your data via a visual dashboard.
 
 ---
 
-## ☁️  Deployment
+## 🧪 Tests & Coverage
 
-- You can try this project on Streamlit instead of installing it locally.
-
-[![Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://smartfocusai.streamlit.app)
-
-
----
-
-## 📑 Reports
-
-Analysis results are generated as PDF reports in the **reports/** folder, containing visualizations and statistical summaries.
-
-Example of a generated report:
 ```bash
-./reports/Netflix_Analysis_Report_20250406.pdf
+# Run all tests
+make test
+
+# Run tests with coverage report
+make coverage
 ```
 
 ---
 
-## 🧪 Tests & CI
+## 📜 License
 
-To run unit and integration tests:
-```bash
-pytest --cov=netflix_eda --cov-report=term-missing --cov-report=xml
-```
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**.
+See the [LICENSE](./LICENSE) file for full details.
 
 ---
+## ✨ Auteur
+🏢 **AetherTech | GeeksterLab**
+_Next-Level Intelligence for Next-Level Minds_
+📧 [GeeksterLab@outlook.com](mailto:GeeksterLab@outlook.com)
 
-MIT © 2025 [YourUsername]
+© 2025

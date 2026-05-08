@@ -1,2 +1,47 @@
-env/
+# ENV
+.env
+.env.*
+*.env
+
+# Devcontainers
+.devcontainer/
+
+# Python cache
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyc
+*.pyd
+
+# Logs
+logs/
+
+# Virtual environments
+.venv/
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code workspace
+.vscode/
+
+# Coverage
+.coverage
+.coveragerc
+
+# Mac
+.DS_Store
+data/.DS_Store
+
+# Streamlit cache
+.streamlit/cache/
+.streamlit/secrets.toml
+
+# Coverage reports
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Data
+data/raw/

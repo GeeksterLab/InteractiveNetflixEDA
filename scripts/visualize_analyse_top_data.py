@@ -1,104 +1,70 @@
-import os
-import glob
-import re
-from datetime import datetime
-import pandas as pd
+"""Generate top-title Netflix charts."""
+
+from __future__ import annotations
+
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
 
-# Définition du chemin de sauvegarde des visualisations
-save_path = "/Users/shaina/Desktop/My_projects/APP/Interactif_Netflix_EDA/visualization/"
-os.makedirs(save_path, exist_ok=True)
+from netflix_utils import VISUALIZATION_DIR, load_latest_enriched_file, safe_filename
 
-# Fonction pour sauvegarder les visualisations
-def save_visualization(title):
-    filename = title.replace(" ", "_").replace(":", "").lower() + ".png"
-    plt.savefig(os.path.join(save_path, filename), bbox_inches="tight")
-    plt.close()  # Fermer la figure pour libérer la mémoire
-    print(f"✅ Graphique sauvegardé : {filename}")
-
-# Set style for visuals
 sns.set_theme(style="darkgrid")
 
-# --- Sélection dynamique du fichier enrichi ---
-directory = "data/processed/"
-files = glob.glob(os.path.join(directory, "enriched_netflix_history_*.csv"))
-pattern = r"enriched_netflix_history_(\d{8}_\d{6})\.csv"
-file_dates = []
-for f in files:
-    basename = os.path.basename(f)
-    match = re.search(pattern, basename)
-    if match:
-        date_str = match.group(1)
-        file_date = datetime.strptime(date_str, "%Y%m%d_%H%M%S")
-        file_dates.append((f, file_date))
 
-if not file_dates:
-    raise FileNotFoundError("Aucun fichier enriched_netflix_history trouvé dans le dossier.")
-
-now = datetime.now()
-closest_file, closest_date = min(file_dates, key=lambda x: abs(now - x[1]))
-print(f"Chargement du fichier : {closest_file} (date extraite : {closest_date})")
-df = pd.read_csv(closest_file)
-# --- Fin de la sélection dynamique ---
-
-# Convertir "Date Watched" en datetime
-# df['Date Watched'] = pd.to_datetime(df['Date Watched'], errors='coerce')
-df['Date Watched'] = pd.to_datetime(df['Date Watched'], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+def save_visualization(title: str) -> None:
+    VISUALIZATION_DIR.mkdir(parents=True, exist_ok=True)
+    filename = safe_filename(title)
+    plt.savefig(VISUALIZATION_DIR / filename, bbox_inches="tight")
+    plt.close()
+    print(f"✅ Chart saved: {filename}")
 
 
-# Séparer les films et les séries
-movies = df[df['corrected_type'] == 'Movie']
-series = df[df['corrected_type'] == 'TV Show']
+def plot_top_counts(counts: pd.Series, title: str, xlabel: str) -> None:
+    if counts.empty:
+        print(f"⚠️ No data for: {title}")
+        return
+    plt.figure(figsize=(12, 6))
+    counts.plot(kind="bar")
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel("Number of Views")
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    save_visualization(title)
 
-# 🔹 Top 20 des séries les plus regardées
-top_series = series['Title'].value_counts().head(20)
-plt.figure(figsize=(12,6))
-top_series.plot(kind='bar', color='blue')
-title = 'Top 20 Most Watched TV Shows'
-plt.title(title)
-plt.xlabel('TV Show Title')
-plt.ylabel('Number of Views')
-plt.xticks(rotation=90)
-save_visualization(title)
 
-# 🔹 Top 20 des films les plus regardés
-top_movies = movies['Title'].value_counts().head(20)
-plt.figure(figsize=(12,6))
-top_movies.plot(kind='bar', color='green')
-title = 'Top 20 Most Watched Movies'
-plt.title(title)
-plt.xlabel('Movie Title')
-plt.ylabel('Number of Views')
-plt.xticks(rotation=90)
-save_visualization(title)
+def main() -> None:
+    df = load_latest_enriched_file().copy()
+    df["Date Watched"] = pd.to_datetime(df["Date Watched"], errors="coerce")
+    df = df.dropna(subset=["Date Watched"])
 
-# 🔹 Top 10 des séries et films regardés par année
-df['Year Watched'] = df['Date Watched'].dt.year
-for year in range(2016, 2026):  # De 2016 à 2025
-    yearly_data = df[df['Year Watched'] == year]
-    if not yearly_data.empty:
-        top_yearly = yearly_data['Title'].value_counts().head(10)
-        plt.figure(figsize=(12,6))
-        top_yearly.plot(kind='bar', color='purple')
-        title = f'Top 10 Most Watched Titles in {year}'
-        plt.title(title)
-        plt.xlabel('Title')
-        plt.ylabel('Number of Views')
-        plt.xticks(rotation=90)
-        save_visualization(title)
+    title_column = "catalog_title" if "catalog_title" in df.columns else "Title"
+    df["analysis_title"] = df[title_column].fillna(df["Title"]).fillna(df["Title"])
 
-# 🔹 Top 10 des séries et films regardés par mois
-df['Month Watched'] = df['Date Watched'].dt.to_period('M')
-for month in df['Month Watched'].unique():
-    monthly_data = df[df['Month Watched'] == month]
-    if not monthly_data.empty:
-        top_monthly = monthly_data['Title'].value_counts().head(10)
-        plt.figure(figsize=(12,6))
-        top_monthly.plot(kind='bar', color='red')
-        title = f'Top 10 Most Watched Titles in {month}'
-        plt.title(title)
-        plt.xlabel('Title')
-        plt.ylabel('Number of Views')
-        plt.xticks(rotation=90)
-        save_visualization(title)
+    movies = df[df["corrected_type"] == "Movie"]
+    series = df[df["corrected_type"] == "TV Show"]
+
+    plot_top_counts(series["analysis_title"].value_counts().head(20), "Top 20 Most Watched TV Shows", "TV Show Title")
+    plot_top_counts(movies["analysis_title"].value_counts().head(20), "Top 20 Most Watched Movies", "Movie Title")
+
+    df["Year Watched"] = df["Date Watched"].dt.year
+    for year in sorted(df["Year Watched"].dropna().astype(int).unique()):
+        yearly = df[df["Year Watched"] == year]
+        plot_top_counts(
+            yearly["analysis_title"].value_counts().head(10),
+            f"Top 10 Most Watched Titles in {year}",
+            "Title",
+        )
+
+    df["Month Watched"] = df["Date Watched"].dt.to_period("M")
+    for month in sorted(df["Month Watched"].dropna().unique()):
+        monthly = df[df["Month Watched"] == month]
+        plot_top_counts(
+            monthly["analysis_title"].value_counts().head(10),
+            f"Top 10 Most Watched Titles in {month}",
+            "Title",
+        )
+
+
+if __name__ == "__main__":
+    main()
