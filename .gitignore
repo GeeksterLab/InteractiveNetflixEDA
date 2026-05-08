@@ -45,6 +45,8 @@ htmlcov/
 
 # Data
 data/raw/
+data/processed/enriched_netflix_history_*.csv
+!data/processed/enriched_netflix_history_20260508_132946.csv
 
 # Report
 reports/
