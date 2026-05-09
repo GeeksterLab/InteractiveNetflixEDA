@@ -146,7 +146,7 @@ def build_enriched_history() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     enriched = enriched.rename(
         columns={
             "Start Time": "Date Watched",
-            "Title": "raw_title",
+            "Title": "Netflix_Title",
             "Matched_Title": "Title",
         }
     )

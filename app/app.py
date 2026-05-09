@@ -9,106 +9,47 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import re
-import os
-import glob
 
 from datetime import datetime
 
 from scripts.netflix_utils import CSS_PATH
+
+import requests
+
+
+TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
+
+@st.cache_data
+def get_poster(title, content_type="movie"):
+    base_url = "https://api.themoviedb.org/3/search/"
+
+    if content_type == "movie":
+        url = f"{base_url}movie?api_key={TMDB_API_KEY}&query={title}"
+    else:
+        url = f"{base_url}tv?api_key={TMDB_API_KEY}&query={title}"
+
+    response = requests.get(url)
+    data = response.json()
+
+    if data["results"]:
+        poster_path = data["results"][0].get("poster_path")
+        if poster_path:
+            return f"https://image.tmdb.org/t/p/w500{poster_path}"
+
+    return None
 
 # Use local CSS
 def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# local_css("assets/css/style.css")
 local_css(CSS_PATH)
-
-# Définir le symbole d'animation
-animation_symbol = "❄"
-
-# Combiner le HTML et le CSS dans une seule chaîne
-html_css = f"""
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-<div class="snowflake">{animation_symbol}</div>
-
-<style>
-/* Animation pour un fond dynamique en dégradé */
-@keyframes gradientAnimation {{
-  0% {{ background-position: 0% 50%; }}
-  50% {{ background-position: 100% 50%; }}
-  100% {{ background-position: 0% 50%; }}
-}}
-
-/* Appliquer l'animation sur le body */
-body {{
-    background: linear-gradient(270deg, #121212, #00E676, #121212);
-    background-size: 600% 600%;
-    animation: gradientAnimation 15s ease infinite;
-    font-family: 'Roboto', sans-serif;
-}}
-
-/* Sidebar avec un fond légèrement contrasté */
-.sidebar .sidebar-content {{
-    # background: #1E1E1E;
-}}
-
-/* Titres avec une couleur néon */
-h1, h2, h3, h4, h5, h6 {{
-    color: #00E676;
-}}
-
-/* Boutons et éléments interactifs */
-.stButton > button {{
-    background-color: #00E176;
-    color: #121212;
-    border: none;
-    border-radius: 5px;
-    padding: 8px 16px;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}}
-.stButton > button:hover {{
-    background-color: #00C853;
-}}
-
-/* Cartes et conteneurs avec une ombre légère */
-.css-1d391kg, .css-1ekf893 {{
-    background: #1E1E1E;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-    padding: 10px;
-}}
-
-/* Personnalisation des barres de défilement */
-::-webkit-scrollbar {{
-    width: 8px;
-}}
-::-webkit-scrollbar-track {{
-    background: #1E1E1E;
-}}
-::-webkit-scrollbar-thumb {{
-    background-color: #00E676;
-    border-radius: 10px;
-}}
-</style>
-"""
-
-# st.markdown(html_css, unsafe_allow_html=True)
-
 
 def select_enriched_file():
     """Sélectionne le fichier enriched_netflix_history le plus récent."""
 
-    project_root = Path(__file__).resolve().parents[1]
-    directory = project_root / "data" / "processed"
+    # project_root = Path(__file__).resolve().parents[1]
+    directory = ROOT_DIR / "data" / "processed"
 
     files = list(directory.glob("enriched_netflix_history_*.csv"))
     pattern = r"enriched_netflix_history_(\d{8}_\d{6})\.csv"
@@ -129,7 +70,7 @@ def select_enriched_file():
 
     latest_file, latest_date = max(file_dates, key=lambda x: x[1])
 
-    st.info(f"Fichier chargé : {latest_file.name}")
+    # st.info(f"Fichier chargé : {latest_file.name}")
     return latest_file
 
 # Chargement des données avec st.cache_data
@@ -294,7 +235,6 @@ def extract_episode(title):
 def display_title_details(df, content_type):
     st.header("Détail par titre")
 
-    # Filtrer selon le type de contenu
     if "corrected_type" in df.columns:
         if content_type == "Movies":
             df_type = df[df["corrected_type"] == "Movie"]
@@ -303,40 +243,97 @@ def display_title_details(df, content_type):
     else:
         df_type = df
 
-    # Sélection du titre
     titles = sorted(df_type["Title"].dropna().unique())
     selected_title = st.selectbox("Sélectionnez un titre :", titles)
     df_title = df_type[df_type["Title"] == selected_title]
 
-    # Nombre de visionnages
-    num_viewings = df_title.shape[0]
-    st.write(f"**Nombre total de visionnages pour _{selected_title}_ : {num_viewings}**")
+    selected_content_type = df_title["corrected_type"].iloc[0]
+    tmdb_type = "tv" if selected_content_type == "TV Show" else "movie"
+    poster = get_poster(selected_title, tmdb_type)
 
-    # Pour les TV Shows, on calcule les détails par épisode
-    if content_type == "TV Shows":
-        st.write("### Détails par épisode")
-        # Copie du DataFrame pour éviter des modifications inattendues
+    num_viewings = df_title.shape[0]
+
+    st.markdown(
+        f"""
+        <div class="hero">
+            <div class="hero-kicker">Selected title</div>
+            <div class="hero-title">{selected_title}</div>
+            <span class="badge">{selected_content_type}</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # hero_bg = poster if poster else ""
+
+    # st.markdown(
+    #     f"""
+    #     <div class="hero" style="background-image: linear-gradient(90deg, rgba(0,0,0,0.9), rgba(0,0,0,0.2)), url('{hero_bg}');">
+    #         <div class="hero-kicker">Selected title</div>
+    #         <div class="hero-title">{selected_title}</div>
+    #         <span class="badge">{selected_content_type}</span>
+    #     </div>
+    #     """,
+    #     unsafe_allow_html=True,
+    # )
+
+    poster_col, details_col = st.columns([1, 2.2])
+
+    with poster_col:
+        if poster:
+            st.markdown(
+                f"""
+                <div class="poster-card">
+                    <img src="{poster}" />
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.info("Aucune affiche trouvée.")
+
+    with details_col:
+        st.markdown(f"## {selected_title}")
+        st.markdown(
+            f"""
+            <div class="metric-card">
+                <span class="metric-label">Nombre total de visionnages</span>
+                <span class="metric-value">{num_viewings}</span>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    if selected_content_type == "TV Show":
+        st.markdown("### Détails par épisode")
+
         df_title = df_title.copy()
-        # Extraire la saison et les informations d'épisode depuis le titre
-        df_title["Season"] = df_title["Title"].apply(extract_season)
-        df_title["Episode Info"] = df_title["Title"].apply(extract_episode)
-        # Récupérer la liste des saisons disponibles
+        df_title["Season"] = df_title["Netflix_Title"].apply(extract_season)
+        df_title["Episode Info"] = df_title["Netflix_Title"].apply(extract_episode)
+
         seasons = sorted(df_title["Season"].dropna().unique())
+
         if len(seasons) > 0:
             selected_season = st.selectbox("Sélectionnez une saison :", seasons)
             df_season = df_title[df_title["Season"] == selected_season]
-            # Calculer le nombre de visionnages par épisode
-            episode_counts = df_season.groupby("Episode Info").size().reset_index(name="Nombre de visionnages")
+
+            episode_counts = (
+                df_season.groupby("Episode Info")
+                .size()
+                .reset_index(name="Nombre de visionnages")
+            )
+
             if not episode_counts.empty:
-                # Extraire le numéro d'épisode pour trier
                 episode_counts["Episode_Number"] = episode_counts["Episode Info"].apply(
-                    lambda x: int(match.group()) if (match := re.search(r'\d+', x)) else None
+                    lambda x: int(match.group()) if (match := re.search(r"\d+", x)) else None
                 )
-                # Trier par numéro d'épisode (du plus petit au plus grand)
-                episode_counts = episode_counts.sort_values(by="Episode_Number")
-                # Réindexer pour un affichage propre et supprimer la colonne temporaire
-                episode_counts = episode_counts.reset_index(drop=True).drop(columns=["Episode_Number"])
-                st.dataframe(episode_counts)
+                episode_counts = (
+                    episode_counts
+                    .sort_values(by="Episode_Number")
+                    .reset_index(drop=True)
+                    .drop(columns=["Episode_Number"])
+                )
+                st.dataframe(episode_counts, use_container_width=True)
             else:
                 st.write("Aucune information détaillée d'épisode n'a pu être extraite pour cette saison.")
         else:
@@ -345,8 +342,8 @@ def display_title_details(df, content_type):
 
 # ------------------ INTERFACE PRINCIPALE ------------------
 
-st.title("Interactif Netflix EDA ")
-st.write("Choisissez dans la barre latérale la section à afficher.")
+st.markdown("# 🎬 Netflix EDA")
+st.markdown("Explore your Netflix viewing history through cleaned data, posters, trends and episode-level insights.")
 
 # Menu principal dans la sidebar pour choisir la section
 section = st.sidebar.radio("Sélectionnez une section :", ["Visualisations", "Exploration par titre"])

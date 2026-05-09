@@ -1,1 +1,158 @@
-/* dummy css */
+
+# ------------------ Netflix-like dark theme ------------------ #
+
+.stApp {
+    background: radial-gradient(circle at top left, #2b0000 0%, #111 35%, #000 100%);
+    color: #f5f5f5;
+}
+
+h1, h2, h3 {
+    color: #e50914 !important;
+    font-weight: 800 !important;
+}
+
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #111 0%, #000 100%);
+    border-right: 1px solid #2a2a2a;
+}
+
+[data-testid="stSidebar"] * {
+    color: #f5f5f5 !important;
+}
+
+.stSelectbox label,
+.stRadio label {
+    color: #f5f5f5 !important;
+    font-weight: 600;
+}
+
+div[data-baseweb="select"] > div {
+    background-color: #181818 !important;
+    color: white !important;
+    border: 1px solid #e50914 !important;
+    border-radius: 8px !important;
+}
+
+.stButton > button {
+    background-color: #e50914;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.stButton > button:hover {
+    background-color: #b20710;
+    color: white;
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #1c1c1c, #080808);
+    border: 1px solid #333;
+    border-left: 5px solid #e50914;
+    border-radius: 14px;
+    padding: 22px;
+    margin-top: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.metric-label {
+    display: block;
+    color: #b3b3b3;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+}
+
+.metric-value {
+    display: block;
+    color: #ffffff;
+    font-size: 2.4rem;
+    font-weight: 800;
+}
+
+img {
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
+}
+
+[data-testid="stDataFrame"] {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+hr {
+    border-color: #333;
+}
+
+.title-block h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #e50914;
+}
+
+.hero {
+    background: linear-gradient(135deg, #111 0%, #1c0000 55%, #e50914 160%);
+    padding: 28px 32px;
+    border-radius: 18px;
+    margin: 18px 0 24px 0;
+    border: 1px solid rgba(229, 9, 20, 0.35);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+}
+
+/* .hero {
+    background-size: cover;
+    background-position: center;
+    padding: 40px;
+    border-radius: 18px;
+    margin: 20px 0;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+} */
+
+.hero-kicker {
+    color: #b3b3b3;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+}
+
+.hero-title {
+    color: #ffffff;
+    font-size: 2.6rem;
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 14px;
+}
+
+.badge {
+    display: inline-block;
+    background: #e50914;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.poster-card {
+    width: 240px;
+    max-width: 100%;
+    position: relative;
+}
+
+.poster-card img {
+    width: 100%;
+    border-radius: 16px;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.65);
+}
+
+.poster-card img:hover {
+    transform: scale(1.035);
+    box-shadow: 0 22px 55px rgba(229, 9, 20, 0.30);
+}
+
+div[data-baseweb="select"] {
+    box-shadow: 0 0 0 2px rgba(229, 9, 20, 0.4);
+    border-radius: 10px;
+}

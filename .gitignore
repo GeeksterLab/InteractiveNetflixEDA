@@ -34,8 +34,8 @@ venv/
 .DS_Store
 
 # Streamlit cache
-.streamlit/cache/
-.streamlit/secrets.toml
+app/.streamlit/cache/
+app/.streamlit/secrets.toml
 
 # Coverage reports
 coverage.xml
@@ -46,6 +46,7 @@ htmlcov/
 data/raw/
 data/processed/enriched_netflix_history_*.csv
 !data/processed/enriched_netflix_history_20260508_132946.csv
+data/processed/debug_*.csv
 
 # Report
 reports/
